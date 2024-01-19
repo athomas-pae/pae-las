@@ -5,4 +5,4 @@ pandas>=0.23.3.2
 plotly==4.14.1
 seaborn>=0
 matplotlib>=0
-StringIO>=0
+
