@@ -1,7 +1,7 @@
 streamlit==0.73.1
 lasio==0.24.1
 missingno==0.4.2
-pandas==0.23.3.2
+pandas==23.3.2
 plotly==4.14.1
 seaborn>=0
 matplotlib>=0
