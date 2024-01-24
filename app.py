@@ -54,7 +54,7 @@ def missing_data():
 
 # Sidebar Options & File Uplaod
 las_file=None
-st.sidebar.image("https://www.0800telefono.org/wp-content/uploads/2018/03/panamerican-energy.jpg", width=300)
+st.sidebar.image("https://www.0800telefono.org/wp-content/uploads/2018/03/panamerican-energy.jpg", width=200)
 st.sidebar.write('# Explorador de .LAS')
 st.sidebar.write('Para comenzar a usar la app, cargar el .LAS en la parte inferior.')
 
