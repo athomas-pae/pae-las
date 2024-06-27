@@ -1,4 +1,7 @@
 import streamlit as st
+
+st.set_page_config(layout="wide", page_title='Analisis de .LAS v1.0')
+
 from load_css import local_css
 import lasio
 import pandas as pd
@@ -12,11 +15,10 @@ import plotting
 import header
 import missingdata
 import cbl
-
-st.set_page_config(layout="wide", page_title='Analisis de .LAS v1.0')
+import corte
+import las_q
 
 local_css("style.css")
-
 
 def load_data(uploaded_file):
     if uploaded_file is not None:
@@ -45,7 +47,6 @@ def load_data(uploaded_file):
 
     return las_file, well_data
 
-
 def missing_data():
     st.title('Informacion Faltante')
     missing_data = well_data.copy()
@@ -53,7 +54,7 @@ def missing_data():
     st.plotly_chart(missing)
 
 # Sidebar Options & File Uplaod
-las_file=None
+las_file = None
 st.sidebar.image("https://www.0800telefono.org/wp-content/uploads/2018/03/panamerican-energy.jpg", width=200)
 st.sidebar.write('# Explorador de .LAS')
 st.sidebar.write('Para comenzar a usar la app, cargar el .LAS en la parte inferior.')
@@ -63,13 +64,12 @@ uploadedfile = st.sidebar.file_uploader(' ', type=['.las'])
 if uploadedfile:
     st.sidebar.success('Archivo subido correctamente!')
     las_file, well_data = load_data(uploadedfile)
-    st.sidebar.write(f'<b>Well Name</b>: {las_file.well.WELL.value}',unsafe_allow_html=True)
-
+    st.sidebar.write(f'<b>Well Name</b>: {las_file.well.WELL.value}', unsafe_allow_html=True)
 
 # Sidebar Navigation
 st.sidebar.title('Menu')
 options = st.sidebar.radio('Seleccionar Opciones:', 
-    ['Home', 'Informacion de Encabezado', 'Informacion de Datos', 'Visualizacion de Datos', 'Visualizacion de datos faltantes', 'Analisis de Calidad de Cemento'])
+    ['Home', 'Informacion de Encabezado', 'Informacion de Datos', 'Visualizacion de Datos', 'Visualizacion de datos faltantes', 'Analisis de Calidad de Cemento', 'Analisis de Cortes', 'Calidad .LAS'])
 
 if options == 'Home':
     home.home()
@@ -83,3 +83,7 @@ elif options == 'Visualizacion de datos faltantes':
     missingdata.missing(las_file, well_data)
 elif options == 'Analisis de Calidad de Cemento':
     cbl.cbl(las_file, well_data)
+elif options == 'Analisis de Cortes':
+    corte.corte(las_file, well_data)
+elif options == 'Calidad .LAS':
+    las_q.quality(las_file, well_data)

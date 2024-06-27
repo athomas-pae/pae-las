@@ -25,13 +25,11 @@ def verificar_calidad_cemento(row, amplitud_caneria_libre_especifica):
 def cargar_tabla_copiada(tabla_copiada):
     # Crea un DataFrame a partir de la tabla copiada
     df1 = pd.read_csv(StringIO(tabla_copiada), delimiter='\t', header=None)
-
     # Asigna nombres a las columnas utilizando la primera fila
     df1.columns = ['TOPE', 'BASE']
-
     return df1 
 
-def cbl (las_file, well_data):
+def cbl(las_file, well_data):
     st.title('Analisis de Calidad de Cemento')
 
     if las_file is not None:
@@ -99,19 +97,17 @@ def cbl (las_file, well_data):
                      fontsize=10, color='blue')
 
         # Check if 'Malo' key exists in calidad_cemento_rango before accessing it
-        if 'Malo' in calidad_cemento_rango.index:
-            malo_percentage = calidad_cemento_rango['Malo']
-        else:
-            malo_percentage = 0.0
-        
+        malo_percentage = calidad_cemento_rango.get('Malo', 0.0)
+        bueno_percentage = calidad_cemento_rango.get('Bueno', 0.0)
+        regular_percentage = calidad_cemento_rango.get('Regular', 0.0)
+
         with st.expander("Datos del Rango Analizado"):
             # Display the table in the expander
             table_data = [['Rango Analizado', f'{toc_teorico:.2f} m - {well_data["DEPTH"].max():.2f} m'],
-                          ['Calidad Bueno', f'{calidad_cemento_rango["Bueno"]:.2f}%'],
-                          ['Calidad Malo', f'{malo_percentage:.2f}%'],  # Use the obtained percentage
-                          ['Calidad Regular', f'{calidad_cemento_rango["Regular"]:.2f}%']]
+                          ['Calidad Bueno', f'{bueno_percentage:.2f}%'],
+                          ['Calidad Malo', f'{malo_percentage:.2f}%'],
+                          ['Calidad Regular', f'{regular_percentage:.2f}%']]
 
-        
         table = plt.table(cellText=table_data, colLabels=None, cellLoc='left', loc='bottom', bbox=[0.2, -0.3, 0.8, 0.2])
         table.auto_set_font_size(False)
         table.set_fontsize(10)
@@ -130,104 +126,101 @@ def cbl (las_file, well_data):
 
         # Show the plot using Streamlit
         st.pyplot(fig)
-    # Agrega un área de texto para que los usuarios peguen la tabla de Excel
-    tabla_copiada = st.text_area("Pegar tabla de Excel (2 columnas):", "")
-
-    # Botón para cargar la tabla copiada
-    if st.button("Cargar Tabla Copiada"):
-        if tabla_copiada:
-            # Carga la tabla copiada en un nuevo DataFrame
-            pzdo_df = cargar_tabla_copiada(tabla_copiada)
-
-            # Puedes realizar operaciones adicionales con el nuevo DataFrame si es necesario
-
-            # Muestra el nuevo DataFrame
-            st.write("Nuevo DataFrame a partir de la tabla copiada:")
-            st.dataframe(pzdo_df)
-        else:
-            st.warning("Por favor, ingrese una tabla copiada válida.")
         
-        # Definir lista para almacenar resultados predominantes
-        resultados_predominantes = []
-        
+        # Agrega un área de texto para que los usuarios peguen la tabla de Excel
+        tabla_copiada = st.text_area("Pegar tabla de Excel (2 columnas):", "")
 
-        # Iterar sobre cada fila de pzdo_df y generar el rango de análisis
-        for index, row in pzdo_df.iterrows():
-            tope_rango = float(row['TOPE'].replace(',', '.')) - ampliacion_rango
-            base_rango = float(row['BASE'].replace(',', '.')) + ampliacion_rango
+        # Botón para cargar la tabla copiada
+        if st.button("Cargar Tabla Copiada"):
+            if tabla_copiada:
+                # Carga la tabla copiada en un nuevo DataFrame
+                pzdo_df = cargar_tabla_copiada(tabla_copiada)
 
-            # Filtrar well_data para el rango específico
-            rango_analizado = well_data[(well_data['DEPTH'] >= tope_rango) & (well_data['DEPTH'] <= base_rango)]
+                # Puedes realizar operaciones adicionales con el nuevo DataFrame si es necesario
 
-            # Verificar calidad del cemento y obtener el valor predominante
-            well_data['calidad_cemento'] = well_data.apply(
-                verificar_calidad_cemento, args=(amplitud_caneria_libre_especifica,), axis=1)
-            calidad_cemento_rango = rango_analizado['calidad_cemento'].value_counts(normalize=True) * 100
-            resultado_predominante = calidad_cemento_rango.idxmax()
+                # Muestra el nuevo DataFrame
+                st.write("Nuevo DataFrame a partir de la tabla copiada:")
+                st.dataframe(pzdo_df)
+            else:
+                st.warning("Por favor, ingrese una tabla copiada válida.")
+            
+            # Definir lista para almacenar resultados predominantes
+            resultados_predominantes = []
+            
+            # Iterar sobre cada fila de pzdo_df y generar el rango de análisis
+            for index, row in pzdo_df.iterrows():
+                tope_rango = float(row['TOPE'].replace(',', '.')) - ampliacion_rango
+                base_rango = float(row['BASE'].replace(',', '.')) + ampliacion_rango
 
-            # Agregar el resultado predominante a la lista
-            resultados_predominantes.append(resultado_predominante)
+                # Filtrar well_data para el rango específico
+                rango_analizado = well_data[(well_data['DEPTH'] >= tope_rango) & (well_data['DEPTH'] <= base_rango)]
 
-        # Crear una nueva columna en pzdo_df con los resultados predominantes
-        pzdo_df['Resultado_Predominante'] = resultados_predominantes
+                # Verificar calidad del cemento y obtener el valor predominante
+                well_data['calidad_cemento'] = well_data.apply(
+                    verificar_calidad_cemento, args=(amplitud_caneria_libre_especifica,), axis=1)
+                calidad_cemento_rango = rango_analizado['calidad_cemento'].value_counts(normalize=True) * 100
+                resultado_predominante = calidad_cemento_rango.idxmax()
 
-        # Crear tabla con valores predominantes en cada rango
-        tabla_predominantes = pd.DataFrame({
-            'TOPE': pzdo_df['TOPE'],
-            'BASE': pzdo_df['BASE'],
-            'Resultado Predominante': pzdo_df['Resultado_Predominante']
-        })
+                # Agregar el resultado predominante a la lista
+                resultados_predominantes.append(resultado_predominante)
 
-        # Visualizar la tabla de resultados predominantes
-        st.write("Tabla de analisis de calidad de cemento en un rango de 5m del punzado:")
-        st.table(tabla_predominantes)
+            # Crear una nueva columna en pzdo_df con los resultados predominantes
+            pzdo_df['Resultado_Predominante'] = resultados_predominantes
 
-        # Crear gráfico de líneas para la curva CBL con suavizado
-        fig, ax = plt.subplots(figsize=(8, 6))
+            # Crear tabla con valores predominantes en cada rango
+            tabla_predominantes = pd.DataFrame({
+                'TOPE': pzdo_df['TOPE'],
+                'BASE': pzdo_df['BASE'],
+                'Resultado Predominante': pzdo_df['Resultado_Predominante']
+            })
 
-        # Suavizar la curva CBL usando savgol_filter
-        cbl_smooth = savgol_filter(well_data['CBL'], window_length=5, polyorder=3)
+            # Visualizar la tabla de resultados predominantes
+            st.write("Tabla de analisis de calidad de cemento en un rango de 5m del punzado:")
+            st.table(tabla_predominantes)
 
-        # Plot de la curva CBL suavizada
-        color = 'tab:red'
-        ax.set_xlabel('Amplitud de CBL')
-        ax.set_ylabel('Profundidad (DEPTH)')
-        ax.plot(cbl_smooth, well_data['DEPTH'], color=color, label='CBL (Suavizado)', linewidth=0.5)
-        ax.tick_params(axis='x', labelrotation=90)  # Rotar etiquetas del eje x
-        ax.invert_yaxis()
+            # Crear gráfico de líneas para la curva CBL con suavizado
+            fig, ax = plt.subplots(figsize=(8, 6))
 
-        # Configurar el eje x para que vaya de 0 a 100
-        ax.set_xlim(0, 100)
-        ax.set_ylim(well_data['DEPTH'].max(), toc_teorico)
+            # Suavizar la curva CBL usando savgol_filter
+            cbl_smooth = savgol_filter(well_data['CBL'], window_length=5, polyorder=3)
 
-        # Resaltar los rangos de la tabla copiada
-        for index, row in pzdo_df.iterrows():
-            tope_rango = float(row['TOPE'].replace(',', '.')) - 5
-            base_rango = float(row['BASE'].replace(',', '.')) + 5
+            # Plot de la curva CBL suavizada
+            color = 'tab:red'
+            ax.set_xlabel('Amplitud de CBL')
+            ax.set_ylabel('Profundidad (DEPTH)')
+            ax.plot(cbl_smooth, well_data['DEPTH'], color=color, label='CBL (Suavizado)', linewidth=0.5)
+            ax.tick_params(axis='x', labelrotation=90)  # Rotar etiquetas del eje x
+            ax.invert_yaxis()
 
-            # Colorear según el resultado predominante
-            if row['Resultado_Predominante'] == 'Bueno':
-                color = 'green'
-            elif row['Resultado_Predominante'] == 'Regular':
-                color = 'yellow'
-            elif row['Resultado_Predominante'] == 'Malo':
-                color = 'red'
+            # Configurar el eje x para que vaya de 0 a 100
+            ax.set_xlim(0, 100)
+            ax.set_ylim(well_data['DEPTH'].max(), toc_teorico)
 
-            # Dibujar el rango
-            ax.axhspan(tope_rango, base_rango, alpha=0.3, color=color, label=f'Rango - {row["Resultado_Predominante"]}')
+            # Resaltar los rangos de la tabla copiada
+            for index, row in pzdo_df.iterrows():
+                tope_rango = float(row['TOPE'].replace(',', '.')) - 5
+                base_rango = float(row['BASE'].replace(',', '.')) + 5
 
-       
+                # Colorear según el resultado predominante
+                if row['Resultado_Predominante'] == 'Bueno':
+                    color = 'green'
+                elif row['Resultado_Predominante'] == 'Regular':
+                    color = 'yellow'
+                elif row['Resultado_Predominante'] == 'Malo':
+                    color = 'red'
 
-        # Agregar cuadro de texto con información
-        info_text = f'Valores Analizados:\n{tabla_predominantes.to_string(index=False)}'
-        ax.text(1.4, 0.98, info_text, transform=ax.transAxes, fontsize=8, verticalalignment='top', horizontalalignment='left', backgroundcolor='white')
+                # Dibujar el rango
+                ax.axhspan(tope_rango, base_rango, alpha=0.3, color=color, label=f'Rango - {row["Resultado_Predominante"]}')
+            
+            # Agregar cuadro de texto con información
+            info_text = f'Valores Analizados:\n{tabla_predominantes.to_string(index=False)}'
+            ax.text(1.4, 0.98, info_text, transform=ax.transAxes, fontsize=8, verticalalignment='top', horizontalalignment='center', backgroundcolor='white')
 
-        fig.tight_layout()
+            fig.tight_layout()
 
-        st.write("Analisis de Cemento vs Punzados")
-        # Mostrar el gráfico usando Streamlit
-        st.pyplot(fig)
-   
+            st.write("Analisis de Cemento vs Punzados")
+            # Mostrar el gráfico usando Streamlit
+            st.pyplot(fig)
+
 if __name__ == '__main__':
     main()
-        
