@@ -1,10 +1,7 @@
-# las_q.py
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
-
-# st.set_page_config(page_title="Control de calidad de .LAS", page_icon="📄", layout="wide")
+import matplotlib.pyplot as plt
 
 def quality(las_file, well_data):
     st.title('Control de Calidad de .LAS')
@@ -21,8 +18,10 @@ def quality(las_file, well_data):
         # Correlation matrix
         st.write('### Matriz de Correlación')
         corr_matrix = well_data.corr()
-        fig, ax = plt.subplots(figsize=(12, 10))
-        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax, annot_kws={"size": 6})
+        fig, ax = plt.subplots(figsize=(20, 16))  # Aumenta el tamaño de la figura
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax, annot_kws={"size": 6}, fmt=".2f", linewidths=0.5)
+        plt.xticks(rotation=90, ha='center', fontsize=8)
+        plt.yticks(fontsize=8)
         st.pyplot(fig)
 
         # Histograms of the well data
@@ -72,15 +71,3 @@ def quality(las_file, well_data):
                 
     else:
         st.warning('No se ha cargado un archivo LAS válido.')
-
-
-
-
-
-
-
-
-
-
-
-
