@@ -21,8 +21,8 @@ def quality(las_file, well_data):
         # Correlation matrix
         st.write('### Matriz de Correlación')
         corr_matrix = well_data.corr()
-        fig, ax = plt.subplots()
-        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax)
+        fig, ax = plt.subplots(figsize=(12, 10))
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax, annot_kws={"size": 6})
         st.pyplot(fig)
 
         # Histograms of the well data
