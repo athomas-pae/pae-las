@@ -3,7 +3,7 @@ import streamlit as st
 def home():
     
 
-    st.title('Analisis de .LAS - Version 1.0')
+    st.title('Analis de .LAS - Version 1.0')
     st.write('## Bienvenido a la app de analisis de .LAS')
     st.write('### Creado por Angel Thomas')
     st.write('''Esta app fue creada para analizar de forma facil e intuitiva un .LAS generado por las cias de Wireline''')
