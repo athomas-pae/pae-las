@@ -247,7 +247,7 @@ def load_data(uploaded_file):
             well_data = las_file.df()
             well_data['DEPTH'] = well_data.index
 
-            # Identificar y renombrar variables específicas
+            # Identify and rename specific variables
             variable_mapping = {
                 'CBLF': 'CBL',
                 'AMP3FT': 'CBL',
@@ -255,22 +255,9 @@ def load_data(uploaded_file):
                 'CBL': 'CBL'
             }
 
-            # Renombrar las columnas según el mapeo
             well_data.rename(columns=variable_mapping, inplace=True)
 
-            # Verificar si hay duplicados después de renombrar
-            if 'CBL' in well_data.columns:
-                # Priorizar la columna 'CBL' original y eliminar las demás
-                cbl_columns = [col for col in well_data.columns if well_data[col].name == 'CBL']
-                if len(cbl_columns) > 1:
-                    # Eliminar todas las columnas CBL excepto la primera (que sería la original)
-                    columns_to_keep = ['DEPTH'] + cbl_columns[:1]
-                    well_data = well_data[columns_to_keep]
-                else:
-                    st.error("Error: No se pudo identificar la columna 'CBL'. Por favor, revise los datos.")
-                    well_data = None
-
-            # Verificar si la columna 'CBL' existe en los datos procesados
+            # Check if 'CBL' column exists
             if 'CBL' not in well_data.columns:
                 st.error("La columna 'CBL' no está presente en los datos cargados.")
                 st.write("Columnas disponibles:", well_data.columns.tolist())
