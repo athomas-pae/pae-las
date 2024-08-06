@@ -64,8 +64,14 @@ def cbl(las_file, well_data, well_name):
         plt.axhline(y=rango_analizado['DEPTH'].max(), color='orange', linestyle='--', label='Fin del Rango Analizado')
 
         calidad_cemento_rango = rango_analizado['calidad_cemento'].value_counts(normalize=True) * 100
-        resultado_predominante = calidad_cemento_rango.idxmax()
-        porcentaje_predominante = calidad_cemento_rango.max()
+
+        # Verificar si calidad_cemento_rango está vacío
+        if not calidad_cemento_rango.empty:
+            resultado_predominante = calidad_cemento_rango.idxmax()
+            porcentaje_predominante = calidad_cemento_rango.max()
+        else:
+            resultado_predominante = "No disponible"
+            porcentaje_predominante = 0.0
 
         plt.annotate(f'{resultado_predominante} - {porcentaje_predominante:.2f}%', 
                      xy=(0.02, 0.98), xycoords='axes fraction',
@@ -138,7 +144,12 @@ def cbl(las_file, well_data, well_name):
                     well_data['calidad_cemento'] = well_data.apply(
                         verificar_calidad_cemento, args=(amplitud_caneria_libre_especifica,), axis=1)
                     calidad_cemento_rango = rango_analizado['calidad_cemento'].value_counts(normalize=True) * 100
-                    resultado_predominante = calidad_cemento_rango.idxmax()
+
+                    # Verificar si calidad_cemento_rango está vacío
+                    if not calidad_cemento_rango.empty:
+                        resultado_predominante = calidad_cemento_rango.idxmax()
+                    else:
+                        resultado_predominante = "No disponible"
 
                     resultados_predominantes.append(resultado_predominante)
 
